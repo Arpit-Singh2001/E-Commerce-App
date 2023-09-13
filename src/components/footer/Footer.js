@@ -18,6 +18,7 @@ function Footer() {
               <li className="hover-link center">
                 <AiOutlineInstagram />
               </li>
+
               <li className="hover-link center">
                 <AiOutlineFacebook />
               </li>
@@ -45,7 +46,8 @@ function Footer() {
             <img src={creditCardImg} alt="credit card img" />
           </div>
           <p>
-            Copyright {new Date().getFullYear()} © <strong>Posterz.</strong>
+            Copyright {new Date().getFullYear()} ©{" "}
+            <strong>Posterz.(Arpit Singh)</strong>
           </p>
         </div>
       </div>

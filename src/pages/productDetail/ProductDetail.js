@@ -1,33 +1,87 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./ProductDetail.scss";
 import dummyImg from "../../assets/naruto.jpeg";
 import { useParams } from "react-router-dom";
+import { axiosClient } from "../../utils/axiosClient";
+import Loader from "../../components/loader/Loader";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, removeFromCart } from "../../redux/cartSlice";
 function ProductDetail() {
   const params = useParams();
+  const [product, setProduct] = useState(null);
 
+  const dispatch = useDispatch();
+
+  const cart = useSelector((state) => state.cartReducer.cart);
+  const quantity =
+    cart.find((item) => item.key === params.ProductId)?.quantity || 0;
+
+  async function fetchData() {
+    const productResponse = await axiosClient.get(
+      `/products?filters[key][$eq]=${params.ProductId}&populate=*`
+    );
+    // console.log(productResponse);
+    if (productResponse.data.data.length > 0) {
+      setProduct(productResponse.data.data[0]);
+    }
+  }
+
+  useEffect(() => {
+    setProduct(null);
+    fetchData();
+  }, [params]);
+
+  if (!product) {
+    return (
+      <div
+        className="loader"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Loader />
+      </div>
+    );
+  }
   return (
     <div className="ProductDetail">
       <div className="container">
         <div className="product-layout">
           <div className="product-img  ">
-            <img src={dummyImg} alt="product img" />
+            <img
+              src={product?.attributes.image.data.attributes.url}
+              alt="product img"
+            />
           </div>
           <div className="product-info">
-            <h1 className="heading">This is the Title.walt poster</h1>
-            <h3 className="price">₹ 666</h3>
-            <p className="description">
-              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas
-              harum hic, ipsa doloremque vel vitae doloribus magnam, velit
-              possimus, sed perspiciatis commodi voluptatum!
-            </p>
+            <h1 className="heading">{product?.attributes.title}</h1>
+            <h3 className="price">₹ {product?.attributes.price}</h3>
+            <p className="description">{product?.attributes.desc}</p>
 
             <div className="cart-options">
               <div className="quantity-selector">
-                <span className="btn decrement">-</span>
-                <span className="quantity">0</span>
-                <span className="btn increment">+</span>
+                <span
+                  className="btn decrement"
+                  onClick={() => dispatch(removeFromCart(product))}
+                >
+                  -
+                </span>
+                <span className="quantity">{quantity}</span>
+                <span
+                  className="btn increment"
+                  onClick={() => dispatch(addToCart(product))}
+                >
+                  +
+                </span>
               </div>
-              <button className="btn-primary add-to-cart">Add to Cart</button>
+              <button
+                className="btn-primary add-to-cart"
+                onClick={() => dispatch(addToCart(product))}
+              >
+                Add to Cart
+              </button>
             </div>
 
             <div className="return-policy">
